@@ -19,7 +19,7 @@ function getListings(contract) {
 
 function displayListings(listings){
     let listingsContainer = document.querySelector('.recent-listings');
-    for (i=0; i < 12; i++) {
+    for (i=0; i < 6; i++) {
         let div = document.createElement('div');
         let img = document.createElement('img');
         let a = document.createElement('a');
@@ -36,12 +36,13 @@ function displayListings(listings){
             ${listings.result[i].buy.type} ${time} min ago`;
 
         listingsContainer.appendChild(a).appendChild(div).appendChild(img);                               
-    }      
+    }
+    showListingSummary();      
 }
 
 function displaySales(sales){
     let salesContainer = document.querySelector('.recent-sales');
-    for (i=0; i < 12; i++) {
+    for (i=0; i < 6; i++) {
         let div = document.createElement('div');
         let img = document.createElement('img');
         let a = document.createElement('a');
@@ -57,6 +58,28 @@ function displaySales(sales){
 
         salesContainer.appendChild(a).appendChild(div).appendChild(img);                               
     }      
+}
+
+function showListingSummary(){
+    let container = document.querySelector('.listing-summary');
+    for (i=0; i < 25; i++){
+        let nameDiv = document.createElement('div');
+        let priceDiv = document.createElement('div');
+        let currencyDiv = document.createElement('div');
+        let timeDiv = document.createElement('div');
+
+        let name = listings.result[i].sell.data.properties.name;
+        let price = listings.result[i].buy.data.quantity/(10**listings.result[i].buy.data.decimals);
+        let currency = listings.result[i].buy.type;
+        let time = getMinutesAgo(i) + 'min ago';
+
+        nameDiv.textContent = name;
+        priceDiv.textContent = price;
+        currencyDiv.textContent = currency;
+        timeDiv.textContent = time;
+
+        container.append(nameDiv, priceDiv, currencyDiv, timeDiv);
+    }
 }
 
 function getMinutesAgo(index) {

@@ -2,6 +2,7 @@ let address = document.getElementById('address').value
 let contract = document.getElementById('contract').value
 let sales = [];
 let listings = [];
+let displayNumber = 12
 
 function getSales(contract) {
     fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
@@ -19,11 +20,11 @@ function getListings(contract) {
 
 function displayListings(listings){
     let listingsContainer = document.querySelector('.recent-listings');
-    for (i=0; i < 6; i++) {
+    for (i=0; i < displayNumber; i++) {
         let div = document.createElement('div');
         let img = document.createElement('img');
         let a = document.createElement('a');
-        let time = getMinutesAgo(i); // get time
+        let time = getMinutesAgo(i);
 
         a.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${listings.result[i].sell.data.token_id}`;
 
@@ -42,7 +43,7 @@ function displayListings(listings){
 
 function displaySales(sales){
     let salesContainer = document.querySelector('.recent-sales');
-    for (i=0; i < 6; i++) {
+    for (i=0; i < displayNumber; i++) {
         let div = document.createElement('div');
         let img = document.createElement('img');
         let a = document.createElement('a');
@@ -60,13 +61,15 @@ function displaySales(sales){
     }      
 }
 
-function showListingSummary(){
+function showListingSummary() {
     let container = document.querySelector('.listing-summary');
+    //container.createTHead();
+
     for (i=0; i < 25; i++){
-        let nameDiv = document.createElement('div');
-        let priceDiv = document.createElement('div');
-        let currencyDiv = document.createElement('div');
-        let timeDiv = document.createElement('div');
+        let nameDiv = document.createElement('td');
+        let priceDiv = document.createElement('td');
+        let currencyDiv = document.createElement('td');
+        let timeDiv = document.createElement('td');
 
         let name = listings.result[i].sell.data.properties.name;
         let price = listings.result[i].buy.data.quantity/(10**listings.result[i].buy.data.decimals);

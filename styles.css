@@ -1,7 +1,10 @@
 body {
+    background-image: url("background-galaxy.jpg");
+    background-size: cover;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     text-align: center;
     display: grid;
+    color: white;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 32px;
     row-gap: 16px;

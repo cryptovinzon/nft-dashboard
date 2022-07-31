@@ -21,6 +21,17 @@ h2 {
     justify-content: center;
 }
 
+.price-container {
+    grid-column: 1/-1;
+    border: solid white 0.5px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    gap: 10px;
+}
+
 .land-container {
     background-color: rgb(31, 27, 64);
     border-radius: 10px;

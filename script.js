@@ -1,5 +1,6 @@
 let address = document.getElementById('address').value
 let contract = document.getElementById('contract').value
+let priceArray;
 let sales = [];
 let listings = [];
 let displayNumber = 12
@@ -24,17 +25,19 @@ function displayListings(listings){
         let div = document.createElement('div');
         let img = document.createElement('img');
         let a = document.createElement('a');
-        let time = getMinutesAgo(listings, i);
 
         a.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${listings.result[i].sell.data.token_id}`;
 
         div.classList.add('item-container');
 
         img.src = listings.result[i].sell.data.properties.image_url;
-        div.textContent = 
-            `${listings.result[i].sell.data.properties.name}
-            ${listings.result[i].buy.data.quantity/(10**(listings.result[i].buy.data.decimals))}
-            ${listings.result[i].buy.type} ${time}`;
+
+        let name = listings.result[i].sell.data.properties.name
+        let price = listings.result[i].buy.data.quantity/(10**(listings.result[i].buy.data.decimals))
+        let currency = listings.result[i].buy.type
+        let time = getMinutesAgo(listings, i);
+
+        div.textContent = `${name} ${price} ${currency} ${time}`;
 
         listingsContainer.appendChild(a).appendChild(div).appendChild(img);                               
     }
@@ -47,16 +50,19 @@ function displaySales(sales){
         let div = document.createElement('div');
         let img = document.createElement('img');
         let a = document.createElement('a');
-        let time = getMinutesAgo(sales, i)
         a.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${sales.result[i].buy.data.token_id}`;
 
         div.classList.add('item-container');
 
         img.src = sales.result[i].buy.data.properties.image_url;
-        div.textContent = 
-            `${sales.result[i].buy.data.properties.name}
-            ${sales.result[i].sell.data.quantity_with_fees/(10**(sales.result[i].sell.data.decimals))}
-            ${sales.result[i].sell.type} ${time}`;
+
+        let name = sales.result[i].buy.data.properties.name;
+        let price = sales.result[i].sell.data.quantity_with_fees/(10**(sales.result[i].sell.data.decimals));
+        let currency = sales.result[i].sell.type;
+        // let usdPrice = (currency == 'ETH') ? `($${Math.round(price * priceArray[1].price)} US)` : '';
+        let time = getMinutesAgo(sales, i);
+
+        div.textContent = `${name} ${price} ${currency} ${time}`;
 
         salesContainer.appendChild(a).appendChild(div).appendChild(img);                               
     }      
@@ -97,17 +103,35 @@ function getMinutesAgo(array, index) {
 }
 
 // learn to return into div without storying in array
-function getPrices() {
-    bannerDiv = document.querySelector('.banner');
+function getPrices() {    
     prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22]')
         .then(response => response.json())
-        .then(data =>console.log(data))
+        .then(data => priceArray = data)
+        .then(showPrices)    
 }
 
+function showPrices() {
+    let container = document.querySelector('.price-container');
+    for (i=0; i < priceArray.length; i++) {
+        let priceDiv = document.createElement('div');
+        priceDiv.textContent = `$${Math.round(priceArray[i].price).toLocaleString("en-US")} ${priceArray[i].symbol}`;
+        container.appendChild(priceDiv);
+    }
+}
+
+// try put these as constructors?
+getPrices();
 getSales(contract);
 getListings(contract);
 
-/* pull out properties (deconstruct)
-const { result } = listings
-const {address: {city}} = person
-*/
+
+// only grabs first 100, old listings don't show up
+function getFloors() {
+    filter = listings.result.filter(obj => {
+        return obj.sell.data.properties.name.includes('Halcyon Sea') && obj.buy.type === 'ETH';
+    });
+    floor = filter.sort((a, b) => {
+        return a.buy.data.quantity - b.buy.data.quantity;
+    })
+    console.table(floor.slice(0,10));
+}

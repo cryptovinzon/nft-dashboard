@@ -3,7 +3,27 @@ let contract = document.getElementById('contract').value
 let priceArray;
 let sales = [];
 let listings = [];
-let displayNumber = 12
+let displayNumber = 12;
+let collectionData;
+
+// TODO: loop colletion data & displayFloor
+function getOpenseaData(collection) {
+fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
+    .then(response => response.json())
+    .then(data => collectionData = data)
+    .then(() => displayFloor(collection, collectionData));
+}
+
+function displayFloor(name, collection){
+    let collectionName = name;
+    let collectionFloor = collection.stats.floor_price;
+
+    let floorContainer = document.querySelector('.floor-price-container');
+    let div = document.createElement('div');
+
+    div.textContent = `${collectionName} ${collectionFloor}`;
+    floorContainer.append(div);
+}
 
 function getSales(contract) {
     fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
@@ -104,7 +124,7 @@ function getMinutesAgo(array, index) {
 
 // learn to return into div without storying in array
 function getPrices() {    
-    prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22]')
+    prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
         .then(response => response.json())
         .then(data => priceArray = data)
         .then(showPrices)    
@@ -123,6 +143,7 @@ function showPrices() {
 getPrices();
 getSales(contract);
 getListings(contract);
+getOpenseaData('legends-of-venari-pass');
 
 
 // only grabs first 100, old listings don't show up
@@ -133,5 +154,5 @@ function getFloors() {
     floor = filter.sort((a, b) => {
         return a.buy.data.quantity - b.buy.data.quantity;
     })
-    console.table(floor.slice(0,10));
+    console.log(floor.slice(0,1));
 }

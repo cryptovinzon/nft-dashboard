@@ -21,7 +21,7 @@ h2 {
     justify-content: center;
 }
 
-.price-container {
+.price-container, .floor-price-container {
     grid-column: 1/-1;
     border: solid white 0.5px;
     height: 100px;

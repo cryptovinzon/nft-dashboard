@@ -1,29 +1,38 @@
-let address = document.getElementById('address').value
-let contract = document.getElementById('contract').value
-let priceArray;
+let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
 let displayNumber = 12;
-let collectionData;
 
 // TODO: loop colletion data & displayFloor
 function getOpenseaData(collection) {
 fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
     .then(response => response.json())
-    .then(data => collectionData = data)
-    .then(() => displayFloor(collection, collectionData));
+    .then((data) => showOSFloor(collection, data));
 }
 
-function displayFloor(name, collection){
-    let collectionName = name;
-    let collectionFloor = collection.stats.floor_price;
-
+function showOSFloor(name, data){
     let floorContainer = document.querySelector('.floor-price-container');
     let div = document.createElement('div');
 
-    div.textContent = `${collectionName} ${collectionFloor}`;
+    div.textContent = `${name} ${data.stats.floor_price}`;
     floorContainer.append(div);
 }
+
+/*
+function getMagicEdenData(collection) {
+    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`)
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+}
+    
+function showMEFloor(name, data){
+    let floorContainer = document.querySelector('.floor-price-container');
+    let div = document.createElement('div');
+
+    div.textContent = `${name} ${data.floorPrice}`;
+    floorContainer.append(div);
+}
+*/
 
 function getSales(contract) {
     fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
@@ -122,19 +131,17 @@ function getMinutesAgo(array, index) {
     }    
 }
 
-// learn to return into div without storying in array
 function getPrices() {    
     prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
         .then(response => response.json())
-        .then(data => priceArray = data)
-        .then(showPrices)    
+        .then(data => showPrices(data))        
 }
 
-function showPrices() {
+function showPrices(array) {
     let container = document.querySelector('.price-container');
-    for (i=0; i < priceArray.length; i++) {
+    for (i=0; i < array.length; i++) {
         let priceDiv = document.createElement('div');
-        priceDiv.textContent = `$${Math.round(priceArray[i].price).toLocaleString("en-US")} ${priceArray[i].symbol}`;
+        priceDiv.textContent = `$${Math.round(array[i].price).toLocaleString("en-US")} ${array[i].symbol}`;
         container.appendChild(priceDiv);
     }
 }
@@ -144,15 +151,4 @@ getPrices();
 getSales(contract);
 getListings(contract);
 getOpenseaData('legends-of-venari-pass');
-
-
-// only grabs first 100, old listings don't show up
-function getFloors() {
-    filter = listings.result.filter(obj => {
-        return obj.sell.data.properties.name.includes('Halcyon Sea') && obj.buy.type === 'ETH';
-    });
-    floor = filter.sort((a, b) => {
-        return a.buy.data.quantity - b.buy.data.quantity;
-    })
-    console.log(floor.slice(0,1));
-}
+// getMagicEdenData('aurory');

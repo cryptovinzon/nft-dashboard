@@ -2,8 +2,9 @@ let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
 let displayNumber = 12;
+const token = config.SECRET_API_KEY;
 
-// TODO: loop colletion data & displayFloor
+// TODO: loop collection data & displayFloor
 function getOpenseaData(collection) {
 fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
     .then(response => response.json())

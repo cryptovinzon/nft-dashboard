@@ -2,7 +2,21 @@ let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
 let displayNumber = 12;
-const token = config.SECRET_API_KEY;
+/* 
+let headers = {
+    "Access-Control-Allow-Headers" : "Content-Type",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+}
+*/
+
+function getNFTs() {
+    const options = {method: 'GET', headers: {Accept: 'application/json', 'X-API-Key': config.SECRET_API_KEY}};
+    fetch('https://deep-index.moralis.io/api/v2/0xE833029958399948e9BdebcE02c55D64FCE6C781/nft?chain=eth&format=decimal', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));      
+    }
 
 // TODO: loop collection data & displayFloor
 function getOpenseaData(collection) {
@@ -14,18 +28,20 @@ fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
 function showOSFloor(name, data){
     let floorContainer = document.querySelector('.floor-price-container');
     let div = document.createElement('div');
+    let a = document.createElement('a');
+    a.href = `https://opensea.io/collection/${name}`;
 
     div.textContent = `${name} ${data.stats.floor_price}`;
-    floorContainer.append(div);
+    floorContainer.appendChild(a).appendChild(div);
 }
 
-/*
+  /*
 function getMagicEdenData(collection) {
     fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`)
     .then((response) => response.json())
     .then((data) => console.log(data))
 }
-    
+
 function showMEFloor(name, data){
     let floorContainer = document.querySelector('.floor-price-container');
     let div = document.createElement('div');
@@ -152,4 +168,6 @@ getPrices();
 getSales(contract);
 getListings(contract);
 getOpenseaData('legends-of-venari-pass');
-// getMagicEdenData('aurory');
+getOpenseaData('legends-of-venari-alpha-pass');
+getOpenseaData('chumbivalleyofficial');
+//getMagicEdenData('aurory')

@@ -23,12 +23,22 @@ h2 {
 .price-container, .floor-price-container {
     grid-column: 1/-1;
     border: solid white 0.5px;
-    height: 100px;
+    height: auto;
+    padding: 12px 0 12px 0;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 24px;
     gap: 10px;
+}
+
+.floor-price-container {    
+    flex-direction: column;
+}
+
+.floor-price-container a {
+    color:  rgb(208, 42, 208);
+    text-decoration: underline;
 }
 
 .land-container {

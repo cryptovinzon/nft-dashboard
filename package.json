@@ -1,0 +1,17 @@
+{
+  "name": "package.json",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cryptovinzon/nft-dashboard.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cryptovinzon/nft-dashboard/issues"
+  },
+  "type": "module",
+  "homepage": "https://github.com/cryptovinzon/nft-dashboard#readme"
+}

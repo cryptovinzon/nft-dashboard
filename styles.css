@@ -1,3 +1,9 @@
+html {
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     background-image: url("background-galaxy.jpg");
     background-size: cover;
@@ -8,8 +14,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
     column-gap: 32px;
     row-gap: 16px;
-    padding-left: 4rem;
-    padding-right: 4rem;
+    padding: 24px 10% 24px 10%;
 }
 
 h1 {
@@ -23,6 +28,7 @@ h2 {
 .price-container, .floor-price-container {
     grid-column: 1/-1;
     border: solid white 0.5px;
+    border-radius: 10px;
     height: auto;
     padding: 12px 0 12px 0;
     display: flex;
@@ -42,6 +48,8 @@ h2 {
 }
 
 .land-container {
+    display: flex;
+    flex-direction: column;
     background-color: rgb(31, 27, 64);
     border-radius: 10px;
     margin-top: 18px;
@@ -50,8 +58,7 @@ h2 {
 .recent-sales, .recent-listings {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    justify-items: center;
-    gap: 18px;
+    justify-items: center;    
     padding-top: 16px;
     padding-bottom: 16px;
     border-radius: 10px;
@@ -61,9 +68,8 @@ h2 {
     display: flex;
     flex-direction: column;
     width: 200px;    
-    padding-bottom: 8px;
+    padding-bottom: 24px;
     align-items: center;
-
 }
 
 a {
@@ -78,4 +84,24 @@ img {
 .listing-summary {
     display: grid;
     grid-template-columns: 2fr repeat(3, 1fr);
+}
+
+@media screen and (max-width: 600px) {
+    body {        
+        padding: 0 8px 0 8px;
+        font-size: 12px;
+    }
+
+    .item-container {
+        width: auto;
+    }
+
+    img {
+        max-width: auto;
+    }
+
+    .recent-sales, .recent-listings {
+        padding: 12px 12px 12px 12px;
+    }
+
 }

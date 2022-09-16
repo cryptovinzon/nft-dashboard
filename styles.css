@@ -85,7 +85,7 @@ img {
     display: grid;
     grid-template-columns: 2fr repeat(3, 1fr);
 }
-
+/*
 @media screen and (max-width: 600px) {
     body {        
         padding: 0 8px 0 8px;
@@ -105,3 +105,4 @@ img {
     }
 
 }
+*/

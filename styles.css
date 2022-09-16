@@ -85,11 +85,14 @@ img {
     display: grid;
     grid-template-columns: 2fr repeat(3, 1fr);
 }
-/*
-@media screen and (max-width: 600px) {
+
+@media screen and (max-width: 800px) {
     body {        
-        padding: 0 8px 0 8px;
-        font-size: 12px;
+        font-size: 10px;
+    }
+
+    .land-container {
+        width: 300px;
     }
 
     .item-container {
@@ -97,7 +100,7 @@ img {
     }
 
     img {
-        max-width: auto;
+        width: 100px;
     }
 
     .recent-sales, .recent-listings {
@@ -105,4 +108,3 @@ img {
     }
 
 }
-*/

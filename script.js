@@ -1,7 +1,7 @@
 let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
-let displayNumber = 12;
+let displayNumber = 6;
 let collections = [
     'legends-of-venari-pass',
     'legends-of-venari-alpha-pass',
@@ -25,7 +25,6 @@ let headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
 }
-*/
 
 function getNFTs() {
     const options = {method: 'GET', headers: {Accept: 'application/json', 'X-API-Key': config.SECRET_API_KEY}};
@@ -34,6 +33,22 @@ function getNFTs() {
       .then(response => console.log(response))
       .catch(err => console.error(err));      
     }
+*/
+
+function getPrices() {    
+    prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
+        .then(response => response.json())
+        .then(data => showPrices(data))        
+}
+
+function showPrices(array) {
+    let container = document.querySelector('.price-container');
+    for (i=0; i < array.length; i++) {
+        let priceDiv = document.createElement('div');
+        priceDiv.textContent = `$${Math.round(array[i].price).toLocaleString("en-US")} ${array[i].symbol}`;
+        container.appendChild(priceDiv);
+    }
+}
 
 function getOpenseaData(collection) {
 fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
@@ -164,20 +179,6 @@ function getMinutesAgo(array, index) {
     }    
 }
 
-function getPrices() {    
-    prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
-        .then(response => response.json())
-        .then(data => showPrices(data))        
-}
-
-function showPrices(array) {
-    let container = document.querySelector('.price-container');
-    for (i=0; i < array.length; i++) {
-        let priceDiv = document.createElement('div');
-        priceDiv.textContent = `$${Math.round(array[i].price).toLocaleString("en-US")} ${array[i].symbol}`;
-        container.appendChild(priceDiv);
-    }
-}
 
 // try put these as constructors?
 getPrices();

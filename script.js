@@ -2,6 +2,23 @@ let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
 let displayNumber = 12;
+let collections = [
+    'legends-of-venari-pass',
+    'legends-of-venari-alpha-pass',
+    'chumbivalleyofficial'
+]
+let regions = [
+    'Abyssal Basin',
+    'Brightland Steppes',
+    'Crimson Waste',
+    'Crystal Shores',
+    'Halcyon Sea',
+    'Shardbluff Labyrinth',
+    'Taiga Boreal'    
+]
+
+let sorted = [];
+
 /* 
 let headers = {
     "Access-Control-Allow-Headers" : "Content-Type",
@@ -18,7 +35,6 @@ function getNFTs() {
       .catch(err => console.error(err));      
     }
 
-// TODO: loop collection data & displayFloor
 function getOpenseaData(collection) {
 fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
     .then(response => response.json())
@@ -59,7 +75,7 @@ function getSales(contract) {
 }
 
 function getListings(contract) {
-    fetch(`https://api.x.immutable.com/v1/orders?include_fees=true&status=active&sell_token_address=${contract}`)
+    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active`)
     .then(response => response.json())
     .then(data => listings = data) // store into global array
     .then(() => displayListings(listings));
@@ -167,7 +183,25 @@ function showPrices(array) {
 getPrices();
 getSales(contract);
 getListings(contract);
-getOpenseaData('legends-of-venari-pass');
-getOpenseaData('legends-of-venari-alpha-pass');
-getOpenseaData('chumbivalleyofficial');
+getSortedLand(contract, 'ETH')
+collections.forEach(collection => getOpenseaData(collection))
+
 //getMagicEdenData('aurory')
+
+function getSortedLand(contract, token) {
+    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active&buy_token_type=${token}&order_by=buy_quantity_with_fees&direction=asc`)
+    .then(response => response.json())
+    .then(data => sorted = data.result)
+}
+
+function getAllFloors(array) {
+    for (let i =0 ; i < array.length; i++) {
+        getRegionFloor(array[i])
+    }
+}
+
+function getRegionFloor(region){
+    let filtered = sorted.filter(obj => obj.sell.data.properties.name.includes(region))
+    console.log(`${filtered[0].sell.data.properties.name} Price: ${filtered[0].buy.data.quantity/10**filtered[0].buy.data.decimals} ETH`); 
+}
+

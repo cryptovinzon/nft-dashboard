@@ -50,16 +50,18 @@ h2 {
 .land-container {
     display: flex;
     flex-direction: column;
+    justify-self: center;
     background-color: rgb(31, 27, 64);
     border-radius: 10px;
     margin-top: 18px;
+    padding: 0 18px 0 18px;
+    max-width: 500px;
 }
 
 .recent-sales, .recent-listings {
     display: grid;
     grid-template-columns: 1fr 1fr;
     justify-items: center;    
-    padding-top: 16px;
     padding-bottom: 16px;
     border-radius: 10px;
 }
@@ -92,7 +94,7 @@ img {
     }
 
     .land-container {
-        width: 300px;
+        padding: 0;
     }
 
     .item-container {
@@ -100,7 +102,7 @@ img {
     }
 
     img {
-        width: 100px;
+        width: clamp(50px, 75px, 100px);
     }
 
     .recent-sales, .recent-listings {

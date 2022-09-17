@@ -18,15 +18,13 @@ body {
     color: white;
 }
 
-h1 {
-    grid-column: 1/-1;
-}
-
-h2 {
+h1, h2 {
     color: white;
+    grid-column: 1/-1;    
+    margin-bottom: 8px;
 }
 
-.price-container, .floor-price-container {
+.price-container, .floor-price-container, .land-floor-container {
     grid-column: 1/-1;
     border: solid white 0.5px;
     border-radius: 10px;
@@ -48,6 +46,13 @@ h2 {
     text-decoration: underline;
 }
 
+.land-floor-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 16px;    
+    padding: 0 8px 16px 8px;
+}
+
 .land-container {
     display: flex;
     flex-direction: column;
@@ -55,15 +60,16 @@ h2 {
     background-color: rgb(31, 27, 64);
     border-radius: 10px;
     margin-top: 18px;    
-    padding: 0 18px 0 18px;    
+    padding: 0 12px 0 12px;    
 }
 
 .recent-sales, .recent-listings {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: flex-end;
     flex-wrap: wrap;
-    gap: 24px;
+    column-gap: 48px;
+    row-gap: 12px;
     padding-bottom: 24px;    
     border-radius: 10px;
 }
@@ -71,7 +77,7 @@ h2 {
 .recent-sales > a, .recent-listings > a {    
     color: white;
     text-decoration: none;      
-    font-size: 14px;            
+    font-size: 16px;            
 }
 
 .item-container {
@@ -104,7 +110,7 @@ img {
 
     .item-container {
         width: 100px;
-        font-size: 10px;         
+        font-size: 8px;         
     }
 
     img {
@@ -115,7 +121,7 @@ img {
         display: grid;
         align-items: end;
         grid-template-columns: 1fr 1fr;        
-        column-gap: 0;
+        column-gap: 8px;
         row-gap: 12px;
         padding: 0;
     }

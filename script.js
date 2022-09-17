@@ -7,6 +7,8 @@ let collections = [
     'legends-of-venari-alpha-pass',
     'chumbivalleyofficial'
 ]
+
+let sortedLand = [];
 let regions = [
     'Abyssal Basin',
     'Brightland Steppes',
@@ -17,23 +19,6 @@ let regions = [
     'Taiga Boreal'    
 ]
 
-let sorted = [];
-
-/* 
-let headers = {
-    "Access-Control-Allow-Headers" : "Content-Type",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
-}
-
-function getNFTs() {
-    const options = {method: 'GET', headers: {Accept: 'application/json', 'X-API-Key': config.SECRET_API_KEY}};
-    fetch('https://deep-index.moralis.io/api/v2/0xE833029958399948e9BdebcE02c55D64FCE6C781/nft?chain=eth&format=decimal', options)
-      .then(response => response.json())
-      .then(response => console.log(response))
-      .catch(err => console.error(err));      
-    }
-*/
 
 function getPrices() {    
     prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
@@ -66,38 +51,23 @@ function showOSFloor(name, data){
     floorContainer.appendChild(a).appendChild(div);
 }
 
-  /*
-function getMagicEdenData(collection) {
-    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`)
-    .then((response) => response.json())
-    .then((data) => console.log(data))
+function getListings(contract) {
+    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active`)
+    .then(response => response.json())
+    .then(data => listings = data)
+    .then(() => displayListings(listings));
 }
-
-function showMEFloor(name, data){
-    let floorContainer = document.querySelector('.floor-price-container');
-    let div = document.createElement('div');
-
-    div.textContent = `${name} ${data.floorPrice}`;
-    floorContainer.append(div);
-}
-*/
 
 function getSales(contract) {
     fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
     .then(response => response.json())
-    .then(data => sales = data) // store into global array
+    .then(data => sales = data)
     .then(() => displaySales(sales));
 }
 
-function getListings(contract) {
-    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active`)
-    .then(response => response.json())
-    .then(data => listings = data) // store into global array
-    .then(() => displayListings(listings));
-}
-
-function displayListings(listings){
+function displayListings(listings) {
     let listingsContainer = document.querySelector('.recent-listings');
+
     for (i=0; i < displayNumber; i++) {
         let div = document.createElement('div');
         let img = document.createElement('img');
@@ -123,6 +93,7 @@ function displayListings(listings){
 
 function displaySales(sales){
     let salesContainer = document.querySelector('.recent-sales');
+
     for (i=0; i < displayNumber; i++) {
         let div = document.createElement('div');
         let img = document.createElement('img');
@@ -147,7 +118,6 @@ function displaySales(sales){
 
 function showListingSummary() {
     let container = document.querySelector('.listing-summary');
-    //container.createTHead();
 
     for (i=0; i < 25; i++){
         let nameDiv = document.createElement('td');
@@ -179,30 +149,42 @@ function getMinutesAgo(array, index) {
     }    
 }
 
+function getSortedLand(contract, token) {
+    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active&buy_token_type=${token}&order_by=buy_quantity_with_fees&direction=asc`)
+    .then(response => response.json())
+    .then(data => sortedLand = data.result)
+    .then(() => getAllFloors(regions))
+}
 
-// try put these as constructors?
+function getAllFloors(regions) {
+    for (let i = 0 ; i < regions.length; i++) {
+        getFloorPrice(regions[i])
+    }
+}
+
+function getFloorPrice(region){
+    let filtered = sortedLand.filter(obj => obj.sell.data.properties.name.includes(region));
+    
+    // get first 2 items
+    let name = region; //filtered[i].sell.data.properties.name;
+    let priceOne = filtered[0].buy.data.quantity/10**filtered[0].buy.data.decimals;
+    let priceTwo = filtered[1].buy.data.quantity/10**filtered[1].buy.data.decimals;
+    let difference = Math.round((priceTwo - priceOne)*100)/100;
+    let floorPrices = `${name} ${priceOne} / ${priceTwo} ETH | \u25B3 ${difference}`;
+    displayFloor(floorPrices);    
+}
+
+function displayFloor(regionFloor) {
+    let landFloorContainer = document.querySelector('.land-floor-container');
+    let div = document.createElement('div');
+
+    div.textContent = regionFloor;
+
+    landFloorContainer.appendChild(div);             
+}
+
 getPrices();
 getSales(contract);
 getListings(contract);
 getSortedLand(contract, 'ETH')
 collections.forEach(collection => getOpenseaData(collection))
-
-//getMagicEdenData('aurory')
-
-function getSortedLand(contract, token) {
-    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active&buy_token_type=${token}&order_by=buy_quantity_with_fees&direction=asc`)
-    .then(response => response.json())
-    .then(data => sorted = data.result)
-}
-
-function getAllFloors(array) {
-    for (let i =0 ; i < array.length; i++) {
-        getRegionFloor(array[i])
-    }
-}
-
-function getRegionFloor(region){
-    let filtered = sorted.filter(obj => obj.sell.data.properties.name.includes(region))
-    console.log(`${filtered[0].sell.data.properties.name} Price: ${filtered[0].buy.data.quantity/10**filtered[0].buy.data.decimals} ETH`); 
-}
-

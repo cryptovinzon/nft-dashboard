@@ -88,8 +88,10 @@ img {
     grid-template-columns: 2fr repeat(3, 1fr);
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 500px) {    
     body {        
+        padding: 0;
+        column-gap: 12px;
         font-size: 10px;
     }
 
@@ -102,7 +104,7 @@ img {
     }
 
     img {
-        width: clamp(50px, 75px, 100px);
+        width: 60px;
     }
 
     .recent-sales, .recent-listings {

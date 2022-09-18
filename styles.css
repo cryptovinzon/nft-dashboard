@@ -100,7 +100,10 @@ img {
     body {        
         padding: 0;
         column-gap: 12px;
-        font-size: 10px;
+    }
+
+    h1, h2, body, .price-container, .floor-price-container, .land-floor-container {
+        font-size: 14px;    
     }
 
     .land-container {
@@ -110,7 +113,7 @@ img {
 
     .item-container {
         width: 100px;
-        font-size: 8px;         
+        font-size: 10px;         
     }
 
     img {
@@ -121,7 +124,7 @@ img {
         display: grid;
         align-items: end;
         grid-template-columns: 1fr 1fr;        
-        column-gap: 8px;
+        column-gap: 6px;
         row-gap: 12px;
         padding: 0;
     }

@@ -2,6 +2,7 @@ let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
 let displayNumber = 6;
+let prices = []
 let collections = [
     'legends-of-venari-pass',
     'legends-of-venari-alpha-pass',
@@ -23,7 +24,8 @@ let regions = [
 function getPrices() {    
     prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
         .then(response => response.json())
-        .then(data => showPrices(data))        
+        .then(data => prices = data)
+        .then(() => showPrices(prices))        
 }
 
 function showPrices(array) {
@@ -170,6 +172,7 @@ function getFloorPrice(region){
     let priceOne = filtered[0].buy.data.quantity/10**filtered[0].buy.data.decimals;
     let priceTwo = filtered[1].buy.data.quantity/10**filtered[1].buy.data.decimals;
     let difference = Math.round((priceTwo - priceOne)*100)/100;
+    // let dollarDifference = difference * prices[1].price;
     let floorPrices = `${name} ${priceOne} / ${priceTwo} ETH | \u25B3 ${difference}`;
     displayFloor(floorPrices);    
 }
@@ -186,5 +189,5 @@ function displayFloor(regionFloor) {
 getPrices();
 getSales(contract);
 getListings(contract);
-getSortedLand(contract, 'ETH')
-collections.forEach(collection => getOpenseaData(collection))
+getSortedLand(contract, 'ETH');
+collections.forEach(collection => getOpenseaData(collection));

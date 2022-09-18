@@ -159,6 +159,10 @@ function getSortedLand(contract, token) {
 }
 
 function getAllFloors(regions) {
+    // show current floor
+    let floorHeader = document.querySelector('.floor')
+    floorHeader.textContent += ` (${sortedLand[0].buy.data.quantity/10**sortedLand[0].buy.data.decimals} ETH)`
+
     for (let i = 0 ; i < regions.length; i++) {
         getFloorPrice(regions[i])
     }

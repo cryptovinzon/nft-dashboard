@@ -98,8 +98,8 @@ img {
 
 @media screen and (max-width: 500px) {    
     body {        
-        padding: 0;
         column-gap: 12px;
+        padding: 0 5% 24px 5%;
     }
 
     h1, h2, body, .price-container, .floor-price-container, .land-floor-container {

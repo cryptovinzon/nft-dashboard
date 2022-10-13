@@ -233,11 +233,14 @@ runApp()
 
 // No 'Access-Control-Allow-Origin' header is present 
 let headers = {
-    mode: 'no-cors'  // returns opaque response only
+    mode: 'cors',
+    headers: {
+        'Access-Control-Allow-Origin': 'https://nft-dashboard-cryptovinzon.vercel.app/'
+    }
 }
 
 function getMagicEdenData(collection) {
-    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`)// , headers)
+    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`, headers)
     .then((response) => response.json())
     .then((data) => console.log(data))
 }

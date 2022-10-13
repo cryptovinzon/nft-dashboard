@@ -4,9 +4,18 @@ let listings = [];
 let displayNumber = 6;
 let prices = []
 let collections = [
-    'legends-of-venari-pass',
-    'legends-of-venari-alpha-pass',
-    'chumbivalleyofficial'
+    {
+    name : "Legends of Venari",
+    slug : "legends-of-venari-pass"
+    },
+    {
+    name : "Legends of Venari Alpha",
+    slug : "legends-of-venari-alpha-pass"
+    },
+    {
+    name : "Chumbi Valley",
+    slug : "chumbivalleyofficial"
+    }
 ]
 
 let sortedLand = [];
@@ -19,7 +28,6 @@ let regions = [
     'Shardbluff Labyrinth',
     'Taiga Boreal'    
 ]
-
 
 function getPrices() {    
     prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
@@ -38,18 +46,18 @@ function showPrices(array) {
 }
 
 function getOpenseaData(collection) {
-fetch(`https://api.opensea.io/api/v1/collection/${collection}/stats`)
+fetch(`https://api.opensea.io/api/v1/collection/${collection.slug}/stats`)
     .then(response => response.json())
     .then((data) => showOSFloor(collection, data));
 }
 
-function showOSFloor(name, data){
+function showOSFloor(collection, data){
     let floorContainer = document.querySelector('.floor-price-container');
     let div = document.createElement('div');
     let a = document.createElement('a');
-    a.href = `https://opensea.io/collection/${name}`;
+    a.href = `https://opensea.io/collection/${collection.slug}`;
 
-    div.textContent = `${name} ${data.stats.floor_price}`;
+    div.textContent = `${collection.name} ${data.stats.floor_price} ETH`;
     floorContainer.appendChild(a).appendChild(div);
 }
 
@@ -121,7 +129,7 @@ function displaySales(sales){
 function showListingSummary() {
     let container = document.querySelector('.listing-summary');
 
-    for (i=0; i < 25; i++){
+    for (i=0; i < 20; i++){
         let nameDiv = document.createElement('td');
         let priceDiv = document.createElement('td');
         let currencyDiv = document.createElement('td');
@@ -169,16 +177,39 @@ function getAllFloors(regions) {
 }
 
 function getFloorPrice(region){
-    let filtered = sortedLand.filter(obj => obj.sell.data.properties.name.includes(region));
+    let filtered = sortedLand.filter(obj => obj.sell.data.properties.name.includes(region));    
+    displayLandFloor(region, filtered[0], filtered[1])
+    //displayAreaListings(region, filtered);
+}
+
+function displayLandFloor(region, firstFloor, secondFloor) {
+    let landFloorContainer = document.querySelector('.land-floor-container');
+    let regionDiv = document.createElement('div');
+    let floorOneDiv = document.createElement('div');
+    let floorOneLink = document.createElement('a')
+    let floorTwoDiv = document.createElement('div');
+    let floorTwoLink = document.createElement('a')
+    let differenceDiv = document.createElement('span')
     
-    // get first 2 items
-    let name = region; //filtered[i].sell.data.properties.name;
-    let priceOne = filtered[0].buy.data.quantity/10**filtered[0].buy.data.decimals;
-    let priceTwo = filtered[1].buy.data.quantity/10**filtered[1].buy.data.decimals;
+    floorOneLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${firstFloor.sell.data.token_id}`
+    floorTwoLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${secondFloor.sell.data.token_id}`
+
+    let priceOne = firstFloor.buy.data.quantity/10**firstFloor.buy.data.decimals;
+    let priceTwo = secondFloor.buy.data.quantity/10**secondFloor.buy.data.decimals;
     let difference = Math.round((priceTwo - priceOne)*100)/100;
-    // let dollarDifference = difference * prices[1].price;
-    let floorPrices = `${name} ${priceOne} / ${priceTwo} ETH | \u25B3 ${difference}`;
-    displayFloor(floorPrices);    
+
+    difference > 0.02? differenceDiv.classList.add('profit') : undefined;
+
+    regionDiv.textContent = region;
+    floorOneDiv.textContent = `${priceOne}`;
+    floorTwoDiv.textContent = `${priceTwo}`;
+    differenceDiv.textContent = `\u25B3 ${difference}`;
+
+    regionDiv.classList.add('area-floor-container');
+
+    landFloorContainer.appendChild(regionDiv).append(floorOneLink, floorTwoLink, differenceDiv);
+    floorOneLink.appendChild(floorOneDiv);
+    floorTwoLink.appendChild(floorTwoDiv);
 }
 
 function displayFloor(regionFloor) {
@@ -190,8 +221,25 @@ function displayFloor(regionFloor) {
     landFloorContainer.appendChild(div);             
 }
 
-getPrices();
-getSales(contract);
-getListings(contract);
-getSortedLand(contract, 'ETH');
-collections.forEach(collection => getOpenseaData(collection));
+function runApp() {
+    getPrices();
+    getSales(contract);
+    getListings(contract);
+    getSortedLand(contract, 'ETH');
+    collections.forEach(collection => getOpenseaData(collection));
+}
+
+runApp()
+
+// No 'Access-Control-Allow-Origin' header is present 
+let headers = {
+    mode: 'no-cors'  // returns opaque response only
+}
+
+function getMagicEdenData(collection) {
+    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`)// , headers)
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+}
+
+getMagicEdenData('aurory')

@@ -212,15 +212,6 @@ function displayLandFloor(region, firstFloor, secondFloor) {
     floorTwoLink.appendChild(floorTwoDiv);
 }
 
-function displayFloor(regionFloor) {
-    let landFloorContainer = document.querySelector('.land-floor-container');
-    let div = document.createElement('div');
-
-    div.textContent = regionFloor;
-
-    landFloorContainer.appendChild(div);             
-}
-
 function runApp() {
     getPrices();
     getSales(contract);

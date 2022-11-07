@@ -16,19 +16,20 @@ function getNFTs() {
 
 
 MAGIC EDEN
+
+// No 'Access-Control-Allow-Origin' header is present 
+let headers = {
+    mode: 'cors',
+    headers: {
+        'Access-Control-Allow-Origin': 'https://nft-dashboard-cryptovinzon.vercel.app/'
+    }
+}
+
 function getMagicEdenData(collection) {
-    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`)
+    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`, headers)
     .then((response) => response.json())
     .then((data) => console.log(data))
 }
 
-function showMEFloor(name, data){
-    let floorContainer = document.querySelector('.floor-price-container');
-    let div = document.createElement('div');
-
-    div.textContent = `${name} ${data.floorPrice}`;
-    floorContainer.append(div);
-}
-
-//getMagicEdenData('aurory')
+getMagicEdenData('aurory')
 */

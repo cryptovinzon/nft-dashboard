@@ -1,9 +1,9 @@
-let contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
+const contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
 let displayNumber = 6;
 let prices = []
-let collections = [
+const ETHCollections = [
     {
     name : "Legends of Venari",
     slug : "legends-of-venari-pass"
@@ -19,7 +19,7 @@ let collections = [
 ]
 
 let sortedLand = [];
-let regions = [
+const regions = [
     'Abyssal Basin',
     'Brightland Steppes',
     'Crimson Waste',
@@ -29,11 +29,14 @@ let regions = [
     'Taiga Boreal'    
 ]
 
-function getPrices() {    
-    prices = fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22]')
-        .then(response => response.json())
-        .then(data => prices = data)
-        .then(() => showPrices(prices))        
+const getPrices = async() => {    
+    const response  = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22,%22MATICUSDT%22]');
+
+    if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	    }
+    
+    prices = await response.json();        
 }
 
 function showPrices(array) {
@@ -45,10 +48,15 @@ function showPrices(array) {
     }
 }
 
-function getOpenseaData(collection) {
-fetch(`https://api.opensea.io/api/v1/collection/${collection.slug}/stats`)
-    .then(response => response.json())
-    .then((data) => showOSFloor(collection, data));
+const getOpenseaData = async(collection) => {
+    const response = await fetch(`https://api.opensea.io/api/v1/collection/${collection.slug}/stats`);
+
+    if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	    }
+    
+    data = await response.json();    
+    showOSFloor(collection, data);
 }
 
 function showOSFloor(collection, data){
@@ -57,7 +65,11 @@ function showOSFloor(collection, data){
     let a = document.createElement('a');
     a.href = `https://opensea.io/collection/${collection.slug}`;
 
-    div.textContent = `${collection.name} ${data.stats.floor_price} ETH`;
+    const name = collection.name;
+    const floorPrice = data.stats.floor_price;
+    const USDTPrice = Math.round(floorPrice * prices[1].price);
+
+    div.textContent = `${name}: ${floorPrice} ETH ${USDTPrice} USDT`;
     floorContainer.appendChild(a).appendChild(div);
 }
 
@@ -72,7 +84,8 @@ function getSales(contract) {
     fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
     .then(response => response.json())
     .then(data => sales = data)
-    .then(() => displaySales(sales));
+    .then(() => {displaySales(sales);
+    });
 }
 
 function displayListings(listings) {
@@ -168,31 +181,44 @@ function getSortedLand(contract, token) {
 
 function getAllFloors(regions) {
     // show current floor
-    let floorHeader = document.querySelector('.floor')
+    let floorHeader = document.querySelector('.floor');
     floorHeader.textContent += ` (${sortedLand[0].buy.data.quantity/10**sortedLand[0].buy.data.decimals} ETH)`
 
     for (let i = 0 ; i < regions.length; i++) {
         getFloorPrice(regions[i])
     }
 }
+/*
+function getDailyVolume() {
+    let salesResult = sales.result;
+    let filtered = salesResult.filter((obj) => {
+        return new Date(obj.timestamp) > new Date() - 60 * 60 * 24 * 1000;
+    });
+    return filtered.length;
+}
+*/
 
 function getFloorPrice(region){
     let filtered = sortedLand.filter(obj => obj.sell.data.properties.name.includes(region));    
     displayLandFloor(region, filtered[0], filtered[1])
+    //displayLandCount(filtered);
     //displayAreaListings(region, filtered);
 }
 
 function displayLandFloor(region, firstFloor, secondFloor) {
     let landFloorContainer = document.querySelector('.land-floor-container');
-    let regionDiv = document.createElement('div');
+    let areaFloorContainer = document.createElement('div')
+    let regionDiv = document.createElement('span');
     let floorOneDiv = document.createElement('div');
     let floorOneLink = document.createElement('a')
     let floorTwoDiv = document.createElement('div');
-    let floorTwoLink = document.createElement('a')
-    let differenceDiv = document.createElement('span')
+    let floorTwoLink = document.createElement('a');
+    let differenceDiv = document.createElement('span');
     
-    floorOneLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${firstFloor.sell.data.token_id}`
-    floorTwoLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${secondFloor.sell.data.token_id}`
+    floorOneLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${firstFloor.sell.data.token_id}`;
+    floorTwoLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${secondFloor.sell.data.token_id}`;
+    floorOneLink.setAttribute('target', '_blank')
+    floorTwoLink.setAttribute('target', '_blank')
 
     let priceOne = firstFloor.buy.data.quantity/10**firstFloor.buy.data.decimals;
     let priceTwo = secondFloor.buy.data.quantity/10**secondFloor.buy.data.decimals;
@@ -205,35 +231,61 @@ function displayLandFloor(region, firstFloor, secondFloor) {
     floorTwoDiv.textContent = `${priceTwo}`;
     differenceDiv.textContent = `\u25B3 ${difference}`;
 
-    regionDiv.classList.add('area-floor-container');
+    areaFloorContainer.classList.add('area-floor-container');
 
-    landFloorContainer.appendChild(regionDiv).append(floorOneLink, floorTwoLink, differenceDiv);
+    landFloorContainer.appendChild(areaFloorContainer).append(regionDiv, floorOneLink, floorTwoLink, differenceDiv);
     floorOneLink.appendChild(floorOneDiv);
     floorTwoLink.appendChild(floorTwoDiv);
 }
 
-function runApp() {
-    getPrices();
+const getAuroryStats = async() => {
+    // const URL = 'https://api-mainnet.magiceden.dev/v2';
+    // const collection = 'aurory'
+    // const response = await fetch(`${URL}/collections/${collection}/stats`);
+
+    /*
+    const response = await fetch('https://marketplace-api.live.aurory.io/v1/programs/marketplace/listings')
+    if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	    }
+
+    const data = await response.json();
+    console.log(data);
+    */
+}
+
+/*
+function displayLandCount(array) {
+    let ETHRanges = [0.4, 0.45, 0.5, 0.6, 0.7];
+    let regionCounts = []
+    // < first case
+    regionCounts.push(array.reduce((acc, obj) => {
+        if (obj.buy.data.quantity/10**obj.buy.data.decimals < ETHRanges[0]) {
+            return acc + 1;
+            };
+            return acc;
+    }, 0));
+
+    for (let i = 0; i < ETHRanges.length - 1; i++){
+        count = array.reduce((acc, obj) => {
+            if (obj.buy.data.quantity/10**obj.buy.data.decimals >= ETHRanges[i] && obj.buy.data.quantity/10**obj.buy.data.decimals < ETHRanges[i + 1]) {
+            return acc + 1;
+            };
+            return acc;
+        }, 0)
+        regionCounts.push(count);
+    }
+    console.log(regionCounts);
+}
+*/
+const run = async() => {
+    await getPrices();
+    await ETHCollections.forEach(collection => getOpenseaData(collection));
+    // await getAuroryStats();
+    showPrices(prices)
     getSales(contract);
     getListings(contract);
     getSortedLand(contract, 'ETH');
-    collections.forEach(collection => getOpenseaData(collection));
 }
 
-runApp()
-
-// No 'Access-Control-Allow-Origin' header is present 
-let headers = {
-    mode: 'cors',
-    headers: {
-        'Access-Control-Allow-Origin': 'https://nft-dashboard-cryptovinzon.vercel.app/'
-    }
-}
-
-function getMagicEdenData(collection) {
-    fetch(`https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`, headers)
-    .then((response) => response.json())
-    .then((data) => console.log(data))
-}
-
-getMagicEdenData('aurory')
+run()

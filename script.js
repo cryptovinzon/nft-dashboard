@@ -1,3 +1,4 @@
+/* eslint-disable */
 const contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
@@ -5,16 +6,16 @@ let displayNumber = 6;
 let prices = []
 const ETHCollections = [
     {
-    name : "Legends of Venari",
-    slug : "legends-of-venari-pass"
+    name: 'Legends of Venari',
+    slug: 'legends-of-venari-pass'
     },
     {
-    name : "Legends of Venari Alpha",
-    slug : "legends-of-venari-alpha-pass"
+    name: 'Legends of Venari Alpha',
+    slug: 'legends-of-venari-alpha-pass'
     },
     {
-    name : "Chumbi Valley",
-    slug : "chumbivalleyofficial"
+    name: 'Chumbi Valley',
+    slug: 'chumbivalleyofficial'
     }
 ]
 
@@ -30,7 +31,7 @@ const regions = [
 ]
 
 const getPrices = async() => {    
-    const response  = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22ILVUSDT%22,%22MATICUSDT%22]');
+    const response  = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22,%22ILVUSDT%22,%22MATICUSDT%22]');
 
     if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
@@ -43,7 +44,7 @@ function showPrices(array) {
     let container = document.querySelector('.price-container');
     for (i=0; i < array.length; i++) {
         let priceDiv = document.createElement('div');
-        priceDiv.textContent = `$${Math.round(array[i].price).toLocaleString("en-US")} ${array[i].symbol}`;
+        priceDiv.textContent = `${Math.round(array[i].price).toLocaleString("en-US")} ${array[i].symbol}`;
         container.appendChild(priceDiv);
     }
 }
@@ -182,7 +183,9 @@ function getSortedLand(contract, token) {
 function getAllFloors(regions) {
     // show current floor
     let floorHeader = document.querySelector('.floor');
-    floorHeader.textContent += ` (${sortedLand[0].buy.data.quantity/10**sortedLand[0].buy.data.decimals} ETH)`
+    let ETHfloor = sortedLand[0].buy.data.quantity/10**sortedLand[0].buy.data.decimals;
+    let floorInUSDT = Math.round(ETHfloor * prices[1].price);
+    floorHeader.textContent += ` (${ETHfloor} ETH ${floorInUSDT} USDT)`
 
     for (let i = 0 ; i < regions.length; i++) {
         getFloorPrice(regions[i])
@@ -239,19 +242,17 @@ function displayLandFloor(region, firstFloor, secondFloor) {
 }
 
 const getAuroryStats = async() => {
-    // const URL = 'https://api-mainnet.magiceden.dev/v2';
-    // const collection = 'aurory'
-    // const response = await fetch(`${URL}/collections/${collection}/stats`);
-
-    /*
-    const response = await fetch('https://marketplace-api.live.aurory.io/v1/programs/marketplace/listings')
+    const URL = 'https://api-mainnet.magiceden.dev/v2';
+    const collection = 'aurory'
+    const response = await fetch(`${URL}/collections/${collection}/stats`);
+    
+    // const response = await fetch('https://marketplace-api.live.aurory.io/v1/programs/marketplace/listings')
     if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	    }
 
     const data = await response.json();
     console.log(data);
-    */
 }
 
 /*

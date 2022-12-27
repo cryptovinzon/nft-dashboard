@@ -102,9 +102,9 @@ img {
     padding-top: 12px;
 }
 
-.listing-summary {
+.listing-summary, .sales-summary {
     display: grid;
-    grid-template-columns: 2fr repeat(3, 1fr);
+    grid-template-columns: auto repeat(3, 1fr);
 }
 
 @media screen and (max-width: 500px) {    

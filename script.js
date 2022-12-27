@@ -138,6 +138,7 @@ function displaySales(sales){
 
         salesContainer.appendChild(a).appendChild(div).appendChild(img);                               
     }      
+    showSalesSummary();
 }
 
 function showListingSummary() {
@@ -153,6 +154,29 @@ function showListingSummary() {
         let price = listings.result[i].buy.data.quantity/(10**listings.result[i].buy.data.decimals);
         let currency = listings.result[i].buy.type;
         let time = getMinutesAgo(listings, i);
+
+        nameDiv.textContent = name;
+        priceDiv.textContent = price;
+        currencyDiv.textContent = currency;
+        timeDiv.textContent = time;
+
+        container.append(nameDiv, priceDiv, currencyDiv, timeDiv);
+    }
+}
+
+function showSalesSummary() {
+    let container = document.querySelector('.sales-summary');
+
+    for (i=0; i < 20; i++){
+        let nameDiv = document.createElement('td');
+        let priceDiv = document.createElement('td');
+        let currencyDiv = document.createElement('td');
+        let timeDiv = document.createElement('td');
+
+        let name = sales.result[i].buy.data.properties.name;
+        let price = sales.result[i].sell.data.quantity_with_fees/(10**(sales.result[i].sell.data.decimals));
+        let currency = sales.result[i].sell.type;
+        let time = getMinutesAgo(sales, i);
 
         nameDiv.textContent = name;
         priceDiv.textContent = price;
@@ -244,7 +268,7 @@ function displayLandFloor(region, firstFloor, secondFloor) {
 const getAuroryStats = async() => {
     const URL = 'https://api-mainnet.magiceden.dev/v2';
     const collection = 'aurory'
-    const response = await fetch(`${URL}/collections/${collection}/stats`);
+    const response = await fetch(`https://magic.cryptovinzon.workers.dev`);
     
     // const response = await fetch('https://marketplace-api.live.aurory.io/v1/programs/marketplace/listings')
     if (!response.ok) {

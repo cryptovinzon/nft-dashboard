@@ -1,4 +1,3 @@
-/* eslint-disable */
 const contract = '0x9e0d99b864e1ac12565125c5a82b59adea5a09cd';
 let sales = [];
 let listings = [];
@@ -85,8 +84,7 @@ function getSales(contract) {
     fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
     .then(response => response.json())
     .then(data => sales = data)
-    .then(() => {displaySales(sales);
-    });
+    .then(() => {displaySales(sales)})
 }
 
 function displayListings(listings) {
@@ -197,23 +195,56 @@ function getMinutesAgo(array, index) {
     }    
 }
 
-function getSortedLand(contract, token) {
-    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active&buy_token_type=${token}&order_by=buy_quantity_with_fees&direction=asc`)
-    .then(response => response.json())
-    .then(data => sortedLand = data.result)
-    .then(() => getAllFloors(regions))
+const getSortedLand = async(contract, token) => {
+    const response = await fetch(`https://api.x.immutable.com/v1/orders?page_size=200&sell_token_address=${contract}&include_fees=true&status=active&buy_token_type=${token}&order_by=buy_quantity_with_fees&direction=asc`)
+    if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	    }
+    
+    sortedLand = await response.json();        
 }
 
-function getAllFloors(regions) {
-    // show current floor
+function getFloor() {    
     let floorHeader = document.querySelector('.floor');
-    let ETHfloor = sortedLand[0].buy.data.quantity/10**sortedLand[0].buy.data.decimals;
+    let ETHfloor = sortedLand.result[0].buy.data.quantity/10**sortedLand.result[0].buy.data.decimals;
     let floorInUSDT = Math.round(ETHfloor * prices[1].price);
-    floorHeader.textContent += ` (${ETHfloor} ETH ${floorInUSDT} USDT)`
 
-    for (let i = 0 ; i < regions.length; i++) {
-        getFloorPrice(regions[i])
-    }
+    floorHeader.textContent += ` (${ETHfloor} ETH ${floorInUSDT} USDT)`
+}
+
+function getVolume() {
+    let dailyVolume = sales.result.filter(item => new Date().getDate() - new Date(item.timestamp).getDate() < 1)
+    console.log(dailyVolume)
+}
+
+function getRegionData(regions) {    
+    regions.forEach(region => {
+        let regionData = {
+            name: region, 
+            firstFloor: '',
+            secondFloor: '',
+            count: ''
+        }
+
+        let filtered = sortedLand.result.filter(obj => obj.sell.data.properties.name.includes(region)); 
+
+        regionData.firstFloor = filtered[0]
+        regionData.secondFloor = filtered[1]
+
+        regionData.count = filtered.reduce((acc, i) => {
+            if (i.buy.data.quantity/10**i.buy.data.decimals < 0.5) {
+                acc.small += 1;
+            } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.5 && i.buy.data.quantity/10**i.buy.data.decimals < 0.6) {
+                acc.med += 1;
+            } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.60) {
+                acc.large += 1;
+            }
+            return acc;
+        }, {small:0, med:0, large:0})
+        displayRegionData(regionData)
+        console.log(regionData)
+    })
+    
 }
 /*
 function getDailyVolume() {
@@ -225,14 +256,7 @@ function getDailyVolume() {
 }
 */
 
-function getFloorPrice(region){
-    let filtered = sortedLand.filter(obj => obj.sell.data.properties.name.includes(region));    
-    displayLandFloor(region, filtered[0], filtered[1])
-    //displayLandCount(filtered);
-    //displayAreaListings(region, filtered);
-}
-
-function displayLandFloor(region, firstFloor, secondFloor) {
+function displayRegionData(region) {
     let landFloorContainer = document.querySelector('.land-floor-container');
     let areaFloorContainer = document.createElement('div')
     let regionDiv = document.createElement('span');
@@ -241,26 +265,32 @@ function displayLandFloor(region, firstFloor, secondFloor) {
     let floorTwoDiv = document.createElement('div');
     let floorTwoLink = document.createElement('a');
     let differenceDiv = document.createElement('span');
+    let countSmallDiv = document.createElement('div')
+    let countMedDiv = document.createElement('div')
+    let countLargeDiv = document.createElement('div')
     
-    floorOneLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${firstFloor.sell.data.token_id}`;
-    floorTwoLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${secondFloor.sell.data.token_id}`;
+    floorOneLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${region.firstFloor.sell.data.token_id}`;
+    floorTwoLink.href = `https://illuvidex.illuvium.io/asset/0x9e0d99b864e1ac12565125c5a82b59adea5a09cd/${region.secondFloor.sell.data.token_id}`;
     floorOneLink.setAttribute('target', '_blank')
     floorTwoLink.setAttribute('target', '_blank')
 
-    let priceOne = firstFloor.buy.data.quantity/10**firstFloor.buy.data.decimals;
-    let priceTwo = secondFloor.buy.data.quantity/10**secondFloor.buy.data.decimals;
+    let priceOne = region.firstFloor.buy.data.quantity/10**region.firstFloor.buy.data.decimals;
+    let priceTwo = region.secondFloor.buy.data.quantity/10**region.secondFloor.buy.data.decimals;
     let difference = Math.round((priceTwo - priceOne)*100)/100;
 
-    difference > 0.02? differenceDiv.classList.add('profit') : undefined;
+    difference > 0.03? differenceDiv.classList.add('profit') : undefined;
 
-    regionDiv.textContent = region;
-    floorOneDiv.textContent = `${priceOne}`;
-    floorTwoDiv.textContent = `${priceTwo}`;
+    regionDiv.textContent = region.name;
+    floorOneDiv.textContent = `${priceOne.toFixed(4)}`;
+    floorTwoDiv.textContent = `${priceTwo.toFixed(4)}`;
     differenceDiv.textContent = `\u25B3 ${difference}`;
+    countSmallDiv.textContent = `${region.count.small}`
+    countMedDiv.textContent = `${region.count.med}`
+    countLargeDiv.textContent = `${region.count.large}`
 
     areaFloorContainer.classList.add('area-floor-container');
 
-    landFloorContainer.appendChild(areaFloorContainer).append(regionDiv, floorOneLink, floorTwoLink, differenceDiv);
+    landFloorContainer.appendChild(areaFloorContainer).append(regionDiv, floorOneLink, floorTwoLink, differenceDiv, countSmallDiv, countMedDiv, countLargeDiv);
     floorOneLink.appendChild(floorOneDiv);
     floorTwoLink.appendChild(floorTwoDiv);
 }
@@ -279,38 +309,16 @@ const getAuroryStats = async() => {
     console.log(data);
 }
 
-/*
-function displayLandCount(array) {
-    let ETHRanges = [0.4, 0.45, 0.5, 0.6, 0.7];
-    let regionCounts = []
-    // < first case
-    regionCounts.push(array.reduce((acc, obj) => {
-        if (obj.buy.data.quantity/10**obj.buy.data.decimals < ETHRanges[0]) {
-            return acc + 1;
-            };
-            return acc;
-    }, 0));
-
-    for (let i = 0; i < ETHRanges.length - 1; i++){
-        count = array.reduce((acc, obj) => {
-            if (obj.buy.data.quantity/10**obj.buy.data.decimals >= ETHRanges[i] && obj.buy.data.quantity/10**obj.buy.data.decimals < ETHRanges[i + 1]) {
-            return acc + 1;
-            };
-            return acc;
-        }, 0)
-        regionCounts.push(count);
-    }
-    console.log(regionCounts);
-}
-*/
 const run = async() => {
     await getPrices();
     await ETHCollections.forEach(collection => getOpenseaData(collection));
+    await getSortedLand(contract, 'ETH');
+    await getSales(contract);
+    getFloor()
+    getRegionData(regions)
     // await getAuroryStats();
     showPrices(prices)
-    getSales(contract);
     getListings(contract);
-    getSortedLand(contract, 'ETH');
 }
 
 run()

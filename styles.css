@@ -55,7 +55,7 @@ h1, h2 {
 
 .area-floor-container{
     display: grid;    
-    grid-template-columns: 20ch repeat(3, 8ch);
+    grid-template-columns: 20ch repeat(3, 8ch) repeat(3, 6ch);
     column-gap: 8px;
     text-align: left;
 }

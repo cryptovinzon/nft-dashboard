@@ -81,10 +81,11 @@ function getListings(contract) {
 }
 
 function getSales(contract) {
-    fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}`)
+    fetch(`https://api.x.immutable.com/v1/orders?buy_token_address=${contract}&status=filled`)
     .then(response => response.json())
     .then(data => sales = data)
-    .then(() => {displaySales(sales)})
+    .then(() => displaySales(sales))
+    .then(() => getVolume())
 }
 
 function displayListings(listings) {
@@ -213,8 +214,8 @@ function getFloor() {
 }
 
 function getVolume() {
-    let dailyVolume = sales.result.filter(item => new Date().getDate() - new Date(item.timestamp).getDate() < 1)
-    console.log(dailyVolume)
+    let dailyVolume = sales.result.filter(item => new Date().getTime() - new Date(item.timestamp).getTime() < (24*60*60*1000));
+    document.querySelector('.floor').textContent += ` | 24h Vol: ${dailyVolume.length}`    
 }
 
 function getRegionData(regions) {    
@@ -242,7 +243,6 @@ function getRegionData(regions) {
             return acc;
         }, {small:0, med:0, large:0})
         displayRegionData(regionData)
-        console.log(regionData)
     })
     
 }

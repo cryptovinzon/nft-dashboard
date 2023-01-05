@@ -119,6 +119,7 @@ img {
 
     h1, h2, body, .price-container, .floor-price-container, .land-floor-container {
         font-size: 12px;    
+        margin-bottom: 8px;
     }
 
     .land-floor-container {

@@ -68,13 +68,14 @@ function showOSFloor(collection, data){
     const name = collection.name;
     const floorPrice = data.stats.floor_price;
     const USDTPrice = Math.round(floorPrice * prices[1].price);
+    const dailyVolume = data.stats.one_day_sales
 
-    div.textContent = `${name}: ${floorPrice} ETH ${USDTPrice} USDT`;
+    div.textContent = `${name}: ${floorPrice} ETH ${USDTPrice} USDT | 24H sales: ${dailyVolume}`;
     floorContainer.appendChild(a).appendChild(div);
 }
 
 function getListings(contract) {
-    fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=${contract}&include_fees=true&status=active`)
+    fetch(`https://api.x.immutable.com/v1/orders?page_size=50&sell_token_address=${contract}&include_fees=true&status=active`)
     .then(response => response.json())
     .then(data => listings = data)
     .then(() => displayListings(listings));
@@ -233,9 +234,9 @@ function getRegionData(regions) {
         regionData.secondFloor = filtered[1]
 
         regionData.count = filtered.reduce((acc, i) => {
-            if (i.buy.data.quantity/10**i.buy.data.decimals < 0.5) {
+            if (i.buy.data.quantity/10**i.buy.data.decimals < 0.55) {
                 acc.small += 1;
-            } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.5 && i.buy.data.quantity/10**i.buy.data.decimals < 0.6) {
+            } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.55 && i.buy.data.quantity/10**i.buy.data.decimals < 0.6) {
                 acc.med += 1;
             } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.60) {
                 acc.large += 1;
@@ -246,15 +247,6 @@ function getRegionData(regions) {
     })
     
 }
-/*
-function getDailyVolume() {
-    let salesResult = sales.result;
-    let filtered = salesResult.filter((obj) => {
-        return new Date(obj.timestamp) > new Date() - 60 * 60 * 24 * 1000;
-    });
-    return filtered.length;
-}
-*/
 
 function displayRegionData(region) {
     let landFloorContainer = document.querySelector('.land-floor-container');
@@ -295,30 +287,32 @@ function displayRegionData(region) {
     floorTwoLink.appendChild(floorTwoDiv);
 }
 
-const getAuroryStats = async() => {
-    const URL = 'https://api-mainnet.magiceden.dev/v2';
-    const collection = 'aurory'
-    const response = await fetch(`https://magic.cryptovinzon.workers.dev`);
-    
-    // const response = await fetch('https://marketplace-api.live.aurory.io/v1/programs/marketplace/listings')
+const getT2listings = async() => {
+    let metadata = '{"tier":["2"]}'
+    let encoded = encodeURI(metadata)
+
+    const response = await fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=0x9e0d99b864e1ac12565125c5a82b59adea5a09cd&buy_token_type=ETH&status=active&order_by=buy_quantity_with_fees&direction=asc&sell_metadata=${encoded}`)
     if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	    }
 
     const data = await response.json();
-    console.log(data);
+    console.log(data)
 }
 
-const run = async() => {
+const run = async() => {        
     await getPrices();
+    showPrices(prices)
+
     await ETHCollections.forEach(collection => getOpenseaData(collection));
+
     await getSortedLand(contract, 'ETH');
-    await getSales(contract);
+    await getT2listings();
     getFloor()
     getRegionData(regions)
-    // await getAuroryStats();
-    showPrices(prices)
+
     getListings(contract);
+    getSales(contract);
 }
 
 run()

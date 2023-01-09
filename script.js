@@ -18,16 +18,6 @@ const ETHCollections = [
     }
 ]
 
-let sortedLand = [];
-const regions = [
-    'Abyssal Basin',
-    'Brightland Steppes',
-    'Crimson Waste',
-    'Crystal Shores',
-    'Halcyon Sea',
-    'Shardbluff Labyrinth',
-    'Taiga Boreal'    
-]
 
 const getPrices = async() => {    
     const response  = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22,%22ILVUSDT%22,%22MATICUSDT%22]');
@@ -43,7 +33,7 @@ function showPrices(array) {
     let container = document.querySelector('.price-container');
     for (i=0; i < array.length; i++) {
         let priceDiv = document.createElement('div');
-        priceDiv.textContent = `${Math.round(array[i].price).toLocaleString("en-US")} ${array[i].symbol}`;
+        priceDiv.textContent = `${Math.round(array[i].price).toLocaleString()} ${array[i].symbol}`;
         container.appendChild(priceDiv);
     }
 }
@@ -197,17 +187,18 @@ function getMinutesAgo(array, index) {
     }    
 }
 
-const getSortedLand = async(contract, token) => {
-    const response = await fetch(`https://api.x.immutable.com/v1/orders?page_size=200&sell_token_address=${contract}&include_fees=true&status=active&buy_token_type=${token}&order_by=buy_quantity_with_fees&direction=asc`)
+const getSortedLand = async(tier) => {
+    let encoded = encodeURI(`{"tier":["${tier}"]}`)
+    const response = await fetch(`https://api.x.immutable.com/v1/orders?page_size=200&sell_token_address=0x9e0d99b864e1ac12565125c5a82b59adea5a09cd&include_fees=true&status=active&buy_token_type=ETH&order_by=buy_quantity_with_fees&direction=asc&sell_metadata=${encoded}`)
     if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	    }
     
-    sortedLand = await response.json();        
+    return await response.json();        
 }
 
-function getFloor() {    
-    let floorHeader = document.querySelector('.floor');
+function getFloor(sortedLand, tier) {    
+    let floorHeader = document.querySelector(`.floor${tier}`);
     let ETHfloor = sortedLand.result[0].buy.data.quantity/10**sortedLand.result[0].buy.data.decimals;
     let floorInUSDT = Math.round(ETHfloor * prices[1].price);
 
@@ -216,10 +207,20 @@ function getFloor() {
 
 function getVolume() {
     let dailyVolume = sales.result.filter(item => new Date().getTime() - new Date(item.timestamp).getTime() < (24*60*60*1000));
-    document.querySelector('.floor').textContent += ` | 24h Vol: ${dailyVolume.length}`    
+    document.querySelector('.sales-header').textContent += ` | 24h Vol: ${dailyVolume.length}`    
 }
 
-function getRegionData(regions) {    
+function getRegionData(sortedLand, tier) {   
+    const regions = [
+        'Abyssal Basin',
+        'Brightland Steppes',
+        'Crimson Waste',
+        'Crystal Shores',
+        'Halcyon Sea',
+        'Shardbluff Labyrinth',
+        'Taiga Boreal'    
+    ]
+
     regions.forEach(region => {
         let regionData = {
             name: region, 
@@ -234,22 +235,35 @@ function getRegionData(regions) {
         regionData.secondFloor = filtered[1]
 
         regionData.count = filtered.reduce((acc, i) => {
-            if (i.buy.data.quantity/10**i.buy.data.decimals < 0.55) {
-                acc.small += 1;
-            } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.55 && i.buy.data.quantity/10**i.buy.data.decimals < 0.6) {
-                acc.med += 1;
-            } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.60) {
-                acc.large += 1;
+            switch(tier) {
+                case 1:
+                    if (i.buy.data.quantity/10**i.buy.data.decimals < 0.50) {
+                        acc.small += 1;
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.50 && i.buy.data.quantity/10**i.buy.data.decimals < 0.6) {
+                        acc.med += 1;
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.60) {
+                        acc.large += 1;
+                    }
+                    return acc;
+                    break;
+                case 2:
+                    if (i.buy.data.quantity/10**i.buy.data.decimals < 1.33) {
+                        acc.small += 1;
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 1.33 && i.buy.data.quantity/10**i.buy.data.decimals < 1.4) {
+                        acc.med += 1;
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 1.4) {
+                        acc.large += 1;
+                    }
+                    return acc;
             }
-            return acc;
+
         }, {small:0, med:0, large:0})
-        displayRegionData(regionData)
-    })
-    
+        displayRegionData(regionData, tier)
+    })    
 }
 
-function displayRegionData(region) {
-    let landFloorContainer = document.querySelector('.land-floor-container');
+function displayRegionData(region, tier) {
+    let landFloorContainer = document.querySelector(`.tier${tier}`);
     let areaFloorContainer = document.createElement('div')
     let regionDiv = document.createElement('span');
     let floorOneDiv = document.createElement('div');
@@ -287,29 +301,19 @@ function displayRegionData(region) {
     floorTwoLink.appendChild(floorTwoDiv);
 }
 
-const getT2listings = async() => {
-    let metadata = '{"tier":["2"]}'
-    let encoded = encodeURI(metadata)
-
-    const response = await fetch(`https://api.x.immutable.com/v1/orders?sell_token_address=0x9e0d99b864e1ac12565125c5a82b59adea5a09cd&buy_token_type=ETH&status=active&order_by=buy_quantity_with_fees&direction=asc&sell_metadata=${encoded}`)
-    if (!response.ok) {
-		throw new Error(`HTTP error! status: ${response.status}`);
-	    }
-
-    const data = await response.json();
-    console.log(data)
-}
-
 const run = async() => {        
     await getPrices();
     showPrices(prices)
 
     await ETHCollections.forEach(collection => getOpenseaData(collection));
 
-    await getSortedLand(contract, 'ETH');
-    await getT2listings();
-    getFloor()
-    getRegionData(regions)
+    const tier1Sorted = await getSortedLand(1);
+    getFloor(tier1Sorted, 1)
+    getRegionData(tier1Sorted, 1)
+
+    const tier2Sorted = await getSortedLand(2);
+    getFloor(tier2Sorted, 2)
+    getRegionData(tier2Sorted, 2)
 
     getListings(contract);
     getSales(contract);

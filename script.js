@@ -18,7 +18,6 @@ const ETHCollections = [
     }
 ]
 
-
 const getPrices = async() => {    
     const response  = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=[%22BTCUSDT%22,%22ETHUSDT%22,%22SOLUSDT%22,%22ILVUSDT%22,%22MATICUSDT%22]');
 
@@ -237,11 +236,11 @@ function getRegionData(sortedLand, tier) {
         regionData.count = filtered.reduce((acc, i) => {
             switch(tier) {
                 case 1:
-                    if (i.buy.data.quantity/10**i.buy.data.decimals < 0.50) {
+                    if (i.buy.data.quantity/10**i.buy.data.decimals < 0.45) {
                         acc.small += 1;
-                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.50 && i.buy.data.quantity/10**i.buy.data.decimals < 0.6) {
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.45 && i.buy.data.quantity/10**i.buy.data.decimals < 0.5) {
                         acc.med += 1;
-                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.60) {
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.50) {
                         acc.large += 1;
                     }
                     return acc;

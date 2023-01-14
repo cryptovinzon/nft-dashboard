@@ -15,6 +15,14 @@ const ETHCollections = [
     {
     name: 'Chumbi Valley',
     slug: 'chumbivalleyofficial'
+    },
+    {
+        name: 'Sipher Neko',
+        slug: 'sipherianflash'
+    },
+    {
+        name: 'Sipher Surge',
+        slug: 'sipheriansurge'
     }
 ]
 
@@ -228,6 +236,17 @@ function getRegionData(sortedLand, tier) {
             count: ''
         }
 
+        let priceRanges = {
+            tier1: {
+                small: 0.4,
+                large: 0.5
+            },
+            tier2: {
+                small: 1.25,
+                large: 1.35
+            }
+        }
+
         let filtered = sortedLand.result.filter(obj => obj.sell.data.properties.name.includes(region)); 
 
         regionData.firstFloor = filtered[0]
@@ -236,21 +255,21 @@ function getRegionData(sortedLand, tier) {
         regionData.count = filtered.reduce((acc, i) => {
             switch(tier) {
                 case 1:
-                    if (i.buy.data.quantity/10**i.buy.data.decimals < 0.45) {
+                    if (i.buy.data.quantity/10**i.buy.data.decimals < priceRanges.tier1.small) {
                         acc.small += 1;
-                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.45 && i.buy.data.quantity/10**i.buy.data.decimals < 0.5) {
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= priceRanges.tier1.small && i.buy.data.quantity/10**i.buy.data.decimals < priceRanges.tier1.large) {
                         acc.med += 1;
-                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 0.50) {
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= priceRanges.tier1.large) {
                         acc.large += 1;
                     }
                     return acc;
                     break;
                 case 2:
-                    if (i.buy.data.quantity/10**i.buy.data.decimals < 1.33) {
+                    if (i.buy.data.quantity/10**i.buy.data.decimals < priceRanges.tier2.small) {
                         acc.small += 1;
-                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 1.33 && i.buy.data.quantity/10**i.buy.data.decimals < 1.4) {
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= priceRanges.tier2.small && i.buy.data.quantity/10**i.buy.data.decimals < priceRanges.tier2.large) {
                         acc.med += 1;
-                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= 1.4) {
+                    } else if (i.buy.data.quantity/10**i.buy.data.decimals >= priceRanges.tier2.large) {
                         acc.large += 1;
                     }
                     return acc;
